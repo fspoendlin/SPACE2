@@ -1,5 +1,6 @@
 import numpy as np
 import numba as nb
+import pandas as pd
 from joblib import Parallel, delayed
 
 # All are north region definitions in imgt numbering
@@ -164,3 +165,29 @@ def rmsd(ab1, ab2, selection=reg_def_fw_all, anchors=reg_def_CDR_all):
         total = total + sum((residues1[i] - residues2[i]) ** 2)
 
     return np.sqrt(total / l)
+
+
+def output_to_pandas(output):
+    """ Sort output into a pandas dataframe
+
+    :param output: dictionary of dictionaries of lists outputted by clustering
+    :return: pandas dataframe
+    """
+    df = pd.DataFrame()
+
+    cluster_by_length = []
+    cluster_by_rmsd = []
+    structure_id = []
+
+    for key in output:
+        for key2 in output[key]:
+            for ID in output[key][key2]:
+                cluster_by_length.append(key)
+                cluster_by_rmsd.append(key2)
+                structure_id.append(ID)
+
+    df["ID"] = structure_id
+    df["cluster_by_length"] = cluster_by_length
+    df["cluster_by_rmsd"] = cluster_by_rmsd
+
+    return df
