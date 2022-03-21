@@ -24,12 +24,12 @@ def cluster_antibodies_by_CDR_length(antibodies, ids):
     return clusters, names
 
 
-def compare_CDRs_for_cluster(cluster, n_jobs=20):
+def compare_CDRs_for_cluster(cluster, n_jobs=-1):
     """ Used for exhaustive clustering.
     Computes the CDR rmsd between every pair of antibodies
 
     :param cluster: list of antibody tuples
-    :param n_jobs: number of cpus to use for parallelising
+    :param n_jobs: number of cpus to use for parallelising. (default is all)
     :return:
     """
 
@@ -82,13 +82,13 @@ def greedy_cluster_ids(cluster, ids, cutoff=1.0):
     return out_clusters
 
 
-def cluster_by_rmsd(files, cutoff=1.0, n_jobs=20):
+def cluster_by_rmsd(files, cutoff=1.0, n_jobs=-1):
     """ Sort a list of antibody pdb files into clusters.
     Antibodies are first clustered by CDR length and the by structural similarity
 
     :param files: list of antibody pdb files. These will be used to identify each antibody
     :param cutoff: cutoff rmsd for structural clustering
-    :param n_jobs: number of cpus to use when parallelising
+    :param n_jobs: number of cpus to use when parallelising. (default is all)
     :return:
     """
     antibodies = parse_antibodies(files, n_jobs=n_jobs)
