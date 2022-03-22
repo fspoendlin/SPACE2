@@ -28,4 +28,4 @@ output_dict = clustruc.cluster_by_rmsd(OAS_files)
 clustered_dataframe = clustruc.util.output_to_pandas(out)
 ```
 
-The output_dict will be a dictionary of dictionaries of lists, where each list contains on cluster. The clustered_dataframe will be a pandas dataframe with columns for structural clusters, CDR length clusters and filenames.
+The output_dict will be a dictionary of dictionaries of lists, where each list contains one cluster. The clustered_dataframe will be a pandas dataframe with columns for structural clusters, CDR length clusters and filenames.
