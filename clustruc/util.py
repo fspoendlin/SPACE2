@@ -125,18 +125,17 @@ def possible_combinations(size):
 
 
 @nb.njit
-def mean_numba(x):
-    res = []
-    for i in range(x.shape[-1]):
-        res.append(x[:, i].mean())
-
-    return np.array(res)
-
-
-@nb.njit
 def get_alignment_transform(fixed, moveable, anchors):
     anch1 = get_residues(moveable, anchors)
     anch2 = get_residues(fixed, anchors)
+    
+    n_residues = anch1.shape[0]
+    
+    anch1_center = anch1.sum(0) / n_residues
+    anch2_center = anch2.sum(0) / n_residues
+    
+    anch1 = anch1-anch1_center
+    anch2 = anch2-anch2_center
 
     V, _, W = np.linalg.svd(anch1.T @ anch2)
     U = V @ W
@@ -144,7 +143,7 @@ def get_alignment_transform(fixed, moveable, anchors):
     if np.linalg.det(U) < 0:
         U = (np.array([[1, 1, -1]]) * V) @ W
 
-    return mean_numba(anch1), mean_numba(anch2), U
+    return anch1_center, anch2_center, U
 
 
 @nb.njit
