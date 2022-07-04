@@ -24,7 +24,7 @@ import clustruc
 
 antibody_models = glob.glob("path/to/antibody/models/*.pdb")
 
-output_dict = clustruc.cluster_by_rmsd(OAS_files)
+output_dict = clustruc.cluster_by_rmsd(antibody_models)
 clustered_dataframe = clustruc.util.output_to_pandas(output_dict)
 ```
 
