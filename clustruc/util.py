@@ -56,8 +56,8 @@ def random_rot():
 def get_antibody(text):
     lines = [x for x in text.split("\n") if x[13:15] == "CA"]
     size = len(lines)
-    numbers = np.zeros(size, dtype=int)
-    coords = np.zeros((size, 3))
+    numbers = np.empty(size, dtype=int)
+    coords = np.empty((size, 3))
 
     for i in range(size):
         line = lines[i]
@@ -85,12 +85,12 @@ def parse_antibodies(files, n_jobs=20):
 def get_residues(antibody, selection):
     numbers, coords = antibody
 
-    ids = np.zeros(len(numbers), dtype=nb.int32)
+    ids = np.empty(len(numbers), dtype=nb.int32)
     for i, n in enumerate(numbers):
         if n in selection:
             ids[i] = 1
 
-    select = np.zeros((sum(ids), 3))
+    select = np.empty((sum(ids), 3))
     count = 0
     for i, val in enumerate(ids):
         if val == 1:
@@ -112,8 +112,8 @@ def get_CDR_lengths(antibody):
 
 @nb.njit
 def possible_combinations(size):
-    out1 = np.zeros(size * (size - 1) // 2, dtype=nb.int32)
-    out2 = np.zeros(size * (size - 1) // 2, dtype=nb.int32)
+    out1 = np.empty(size * (size - 1) // 2, dtype=nb.int32)
+    out2 = np.empty(size * (size - 1) // 2, dtype=nb.int32)
     count = 0
     for i in range(size):
         for j in range(size):
@@ -154,7 +154,7 @@ def align(fixed, moveable, anchors):
 
 
 @nb.njit
-def rmsd(ab1, ab2, selection=reg_def_fw_all, anchors=reg_def_CDR_all):
+def rmsd(ab1, ab2, selection=reg_def_CDR_all, anchors=reg_def_fw_all):
     residues1 = get_residues(ab1, selection)
     residues2 = get_residues(align(ab1, ab2, anchors), selection)
     l = len(residues1)
