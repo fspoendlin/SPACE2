@@ -14,9 +14,9 @@ setup(
     include_package_data=True,
     packages=find_packages(include=('clustruc', 'clustruc.*')),
     install_requires=[
-        'numpy>=1.20.0',
         'numba>=0.51.0',
         'joblib>=1.0.0',
+        'scipy',
         'pandas',
     ],
 )
