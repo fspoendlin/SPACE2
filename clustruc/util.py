@@ -126,6 +126,8 @@ def possible_combinations(size):
 
 @nb.njit
 def get_alignment_transform(fixed, moveable, anchors):
+    anchors = np.intersect1d(np.intersect1d(anchors, fixed[0]), moveable[0])
+  
     anch1 = get_residues(moveable, anchors)
     anch2 = get_residues(fixed, anchors)
     
