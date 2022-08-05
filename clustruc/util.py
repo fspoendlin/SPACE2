@@ -85,12 +85,12 @@ def parse_antibodies(files, n_jobs=20):
 def get_residues(antibody, selection):
     numbers, coords = antibody
 
-    ids = np.empty(len(numbers), dtype=nb.int32)
+    ids = np.zeros(len(numbers), dtype=nb.int32)
     for i, n in enumerate(numbers):
         if n in selection:
             ids[i] = 1
 
-    select = np.empty((sum(ids), 3))
+    select = np.zeros((sum(ids), 3))
     count = 0
     for i, val in enumerate(ids):
         if val == 1:
@@ -112,8 +112,8 @@ def get_CDR_lengths(antibody):
 
 @nb.njit
 def possible_combinations(size):
-    out1 = np.empty(size * (size - 1) // 2, dtype=nb.int32)
-    out2 = np.empty(size * (size - 1) // 2, dtype=nb.int32)
+    out1 = np.zeros(size * (size - 1) // 2, dtype=nb.int32)
+    out2 = np.zeros(size * (size - 1) // 2, dtype=nb.int32)
     count = 0
     for i in range(size):
         for j in range(size):
