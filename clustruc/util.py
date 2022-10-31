@@ -61,12 +61,15 @@ def get_antibody(text):
 
     for i in range(size):
         line = lines[i]
+        assert (line[21] == "H") or (line[21] == "L"), "Chains must be labelled H for heavy and L for light" 
         chain_term = 128 if line[21] == "L" else 0
-        numbers[i] = int(line[22:26]) + chain_term
-        x = float(line[30:38])
-        y = float(line[38:46])
-        z = float(line[46:54])
-        coords[i] = (x, y, z)
+        number = int(line[22:26])
+        if number <= 128:
+            numbers[i] = number + chain_term
+            x = float(line[30:38])
+            y = float(line[38:46])
+            z = float(line[46:54])
+            coords[i] = (x, y, z)
 
     return numbers, coords
 
