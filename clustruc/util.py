@@ -70,8 +70,10 @@ def get_antibody(text):
             y = float(line[38:46])
             z = float(line[46:54])
             coords[i] = (x, y, z)
+        else:
+            numbers[i] = -1
 
-    return numbers, coords
+    return numbers[numbers!=-1], coords[numbers!=-1]
 
 
 def parse_antibody(file):
