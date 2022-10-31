@@ -105,6 +105,25 @@ def get_residues(antibody, selection):
     return select
 
 
+@nb.njit
+def remove_insertions(ab):
+    nums = ab[0]
+    l_ab = len(nums)
+    mask = np.ones(l_ab, np.int64)
+    for i in range(1,l_ab):
+        if nums[i] == nums[i-1]:
+            mask[i] = 0
+            
+    indices = np.empty(sum(mask), np.int64)
+    count = 0
+    
+    for i in range(l_ab):
+        if mask[i] == 1:
+            indices[count] = i
+            count = count + 1
+    return nums[indices], ab[1][indices]
+
+
 def get_CDR_lengths(antibody):
     len_h1 = str(len(get_residues(antibody, reg_def["CDRH1"])))
     len_h2 = str(len(get_residues(antibody, reg_def["CDRH2"])))
@@ -131,6 +150,7 @@ def possible_combinations(size):
 
 @nb.njit
 def get_alignment_transform(fixed, moveable, anchors):
+    fixed, moveable = remove_insertions(fixed), remove_insertions(moveable)
     anchors = np.intersect1d(np.intersect1d(anchors, fixed[0]), moveable[0])
   
     anch1 = get_residues(moveable, anchors)
