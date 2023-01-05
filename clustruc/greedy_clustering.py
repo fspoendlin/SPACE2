@@ -1,44 +1,6 @@
 import numpy as np
 from joblib import Parallel, delayed
-from clustruc.util import get_CDR_lengths, possible_combinations, rmsd, parse_antibodies
-
-
-def cluster_antibodies_by_CDR_length(antibodies, ids):
-    """ Sort a list of antibody tuples into groups with the same CDR lengths
-
-    :param antibodies: list of antibody tuples
-    :param ids: list of ids for each antibody
-    :return:
-    """
-    clusters = dict()
-    names = dict()
-
-    for i, antibody in enumerate(antibodies):
-        cdr_l = "_".join(get_CDR_lengths(antibody))
-        if cdr_l not in clusters:
-            clusters[cdr_l] = [antibody]
-            names[cdr_l] = [ids[i]]
-        else:
-            clusters[cdr_l].append(antibody)
-            names[cdr_l].append(ids[i])
-    return clusters, names
-
-
-def compare_CDRs_for_cluster(cluster, n_jobs=-1):
-    """ Used for exhaustive clustering.
-    Computes the CDR rmsd between every pair of antibodies
-
-    :param cluster: list of antibody tuples
-    :param n_jobs: number of cpus to use for parallelising. (default is all)
-    :return:
-    """
-
-    size = len(cluster)
-
-    indices = possible_combinations(size)
-    rmsd_calculations = Parallel(n_jobs=n_jobs)(delayed(rmsd)(cluster[i], cluster[j]) for i, j in zip(*indices))
-
-    return indices, rmsd_calculations
+from clustruc.util import rmsd, parse_antibodies, cluster_antibodies_by_CDR_length
 
 
 def greedy_cluster(cluster, cutoff=1.0):
