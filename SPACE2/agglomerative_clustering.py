@@ -11,7 +11,7 @@ def agglomerative_clustering(files, cutoff=1.0, n_jobs=-1):
     :param n_jobs: number of cpus to use when parallelising. (default is all)
     :return:
     """
-    clustering_algorithm = AgglomerativeClustering(n_clusters=None, affinity='precomputed', distance_threshold=cut_off, linkage='complete')
+    clustering_algorithm = AgglomerativeClustering(n_clusters=None, metric='precomputed', distance_threshold=cutoff, linkage='complete')
     final_clustering = cluster_with_algorithm(clustering_algorithm, files)
     
     return final_clustering
