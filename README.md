@@ -8,24 +8,35 @@ To download and install:
 
 ```bash
 $ git clone https://github.com/brennanaba/cdr-structural-clustering.git
-$ pip install cdr-structural-clustering/
+$ pip install SPACE2/
 ```
 
 ## Usage
 
-To run the clustering you will need antibody models, these can be obtained from <a href="http://opig.stats.ox.ac.uk/webapps/newsabdab/sabpred/abodybuilder/">ABodyBuilder</a>.
+To run the clustering you will need antibody models which are IMGT numbered, these can be obtained from <a href="https://github.com/brennanaba/ImmuneBuilder">ImmuneBuilder</a>.
 
-Once you have a directory with antibody models you can cluster them (first by CDR length and then by structural similarity) using:
-
+Once you have a directory with antibody models you can cluster them using agglomerative clustering:
 
 ```python
 import glob
-import clustruc
+import SPACE2
 
 antibody_models = glob.glob("path/to/antibody/models/*.pdb")
 
-output_dict = clustruc.cluster_by_rmsd(antibody_models)
-clustered_dataframe = clustruc.util.output_to_pandas(output_dict)
+clustered_dataframe = SPACE2.agglomerative_clustering(antibody_models, cutoff=1.0)
 ```
 
-The output_dict will be a dictionary of dictionaries of lists, where each list contains one cluster. The clustered_dataframe will be a pandas dataframe with columns for structural clusters, CDR length clusters and filenames.
+greedy clustering:
+
+```python
+clustered_dataframe = SPACE2.greedy_clustering(antibody_models, cutoff=1.0)
+```
+
+or a custom clustering aglorithm. The clustering algorithm should be a class and follow the syntax of scikit-learn. The class must have a `self.fit(X)` method that takes an distance matrix as an input and store cluster labels in a `self.labels_` attribute.
+
+```python
+algorithm = CustomClusteringAlgorithm()
+clustered_dataframe = SPACE2.cluster_with_algorithm(algorithm, antibody_models)
+```
+
+Antibodies are first grouped by CDR length and then clustered by structural similarity with the selected algorithm. The output will be a pandas dataframe with columns for filenames, CDR length clusters and structural clusters.

@@ -193,6 +193,27 @@ def rmsd(ab1, ab2, selection=reg_def_CDR_all, anchors=reg_def_fw_all):
     return np.sqrt(total / l)
 
 
+def cluster_antibodies_by_CDR_length(antibodies, ids):
+    """ Sort a list of antibody tuples into groups with the same CDR lengths
+
+    :param antibodies: list of antibody tuples
+    :param ids: list of ids for each antibody
+    :return:
+    """
+    clusters = dict()
+    names = dict()
+
+    for i, antibody in enumerate(antibodies):
+        cdr_l = "_".join(get_CDR_lengths(antibody))
+        if cdr_l not in clusters:
+            clusters[cdr_l] = [antibody]
+            names[cdr_l] = [ids[i]]
+        else:
+            clusters[cdr_l].append(antibody)
+            names[cdr_l].append(ids[i])
+    return clusters, names
+
+
 def output_to_pandas(output):
     """ Sort output into a pandas dataframe
 
