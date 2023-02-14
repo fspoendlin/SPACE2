@@ -8,24 +8,29 @@ To download and install:
 
 ```bash
 $ git clone https://github.com/brennanaba/cdr-structural-clustering.git
-$ pip install cdr-structural-clustering/
+$ pip install SPACE2/
 ```
 
 ## Usage
 
-To run the clustering you will need antibody models, these can be obtained from <a href="http://opig.stats.ox.ac.uk/webapps/newsabdab/sabpred/abodybuilder/">ABodyBuilder</a>.
+To run the clustering you will need antibody models which are IMGT numbered, these can be obtained from <a href="https://github.com/brennanaba/ImmuneBuilder">ImmuneBuilder</a>.
 
-Once you have a directory with antibody models you can cluster them (first by CDR length and then by structural similarity) using:
-
+Once you have a directory with antibody models you can cluster them using agglomerative clustering:
 
 ```python
 import glob
-import clustruc
+import SPACE2
 
 antibody_models = glob.glob("path/to/antibody/models/*.pdb")
 
-output_dict = clustruc.cluster_by_rmsd(antibody_models)
-clustered_dataframe = clustruc.util.output_to_pandas(output_dict)
+clustered_dataframe = SPACE2.agglomerative_clustering(antibody_models, cutoff=1.0)
 ```
 
-The output_dict will be a dictionary of dictionaries of lists, where each list contains one cluster. The clustered_dataframe will be a pandas dataframe with columns for structural clusters, CDR length clusters and filenames.
+or greedy clustering algorithms:
+
+```python
+
+clustered_dataframe = SPACE2.greedy_clustering(antibody_models, cutoff=1.0)
+```
+
+Antibodies are first grouped by CDR length and then clustered by structural similarity with the selected algorithm. The output will be a pandas dataframe with columns for filenames, CDR length clusters and structural clusters.

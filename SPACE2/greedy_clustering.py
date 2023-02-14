@@ -1,6 +1,6 @@
 import numpy as np
 from joblib import Parallel, delayed
-from clustruc.util import rmsd, parse_antibodies, cluster_antibodies_by_CDR_length
+from SPACE2.util import rmsd, parse_antibodies, cluster_antibodies_by_CDR_length, output_to_pandas
 
 
 def greedy_cluster(cluster, cutoff=1.0):
@@ -44,7 +44,7 @@ def greedy_cluster_ids(cluster, ids, cutoff=1.0):
     return out_clusters
 
 
-def cluster_by_rmsd(files, cutoff=1.0, n_jobs=-1):
+def greedy_clustering(files, cutoff=1.0, n_jobs=-1):
     """ Sort a list of antibody pdb files into clusters.
     Antibodies are first clustered by CDR length and the by structural similarity
 
@@ -60,4 +60,4 @@ def cluster_by_rmsd(files, cutoff=1.0, n_jobs=-1):
         delayed(greedy_cluster_ids)(cdr_clusters[key], cdr_cluster_ids[key], cutoff) for key in cdr_cluster_ids.keys())
     final_clustering = {key: final_clustering[i] for i, key in enumerate(cdr_clusters)}
 
-    return final_clustering
+    return output_to_pandas(final_clustering)

@@ -1,2 +1,0 @@
-from clustruc.greedy_clustering import cluster_by_rmsd
-from clustruc.exhaustive_clustering import cluster_with_method

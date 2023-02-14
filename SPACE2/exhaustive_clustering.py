@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-from clustruc.util import cluster_antibodies_by_CDR_length, rmsd, parse_antibodies, possible_combinations
+from SPACE2.util import cluster_antibodies_by_CDR_length, rmsd, parse_antibodies, possible_combinations
 
 
 def compare_CDRs_for_cluster(cluster, n_jobs=-1):
@@ -128,7 +128,7 @@ def get_clustering(df, clustering):
     return pd.DataFrame({'ID': ids, 'cluster_by_length': length, 'cluster_by_rmsd': cluster})
 
 
-def cluster_with_method(method, files):
+def cluster_with_algorithm(method, files):
     """ Sort a list of antibody pdb files into clusters.
     Antibodies are first clustered by CDR length and the by structural similarity
 
