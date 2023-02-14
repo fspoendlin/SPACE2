@@ -33,7 +33,7 @@ greedy clustering:
 clustered_dataframe = SPACE2.greedy_clustering(antibody_models, cutoff=1.0)
 ```
 
-or a custom clustering aglorithm. The clustering algorithm used should a class and follow the syntax of scikit-learn. The class must have a `self.fit(X)` method that takes an distance matrix as an input and store cluster labels in a `self.labels_` attribute.
+or a custom clustering aglorithm. The clustering algorithm should be a class and follow the syntax of scikit-learn. The class must have a `self.fit(X)` method that takes an distance matrix as an input and store cluster labels in a `self.labels_` attribute.
 
 ```python
 
