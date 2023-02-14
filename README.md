@@ -29,6 +29,10 @@ clustered_dataframe = SPACE2.agglomerative_clustering(antibody_models, cutoff=1.
 greedy clustering:
 
 ```python
+import glob
+import SPACE2
+
+antibody_models = glob.glob("path/to/antibody/models/*.pdb")
 
 clustered_dataframe = SPACE2.greedy_clustering(antibody_models, cutoff=1.0)
 ```
@@ -36,9 +40,13 @@ clustered_dataframe = SPACE2.greedy_clustering(antibody_models, cutoff=1.0)
 or a custom clustering aglorithm. The clustering algorithm should be a class and follow the syntax of scikit-learn. The class must have a `self.fit(X)` method that takes an distance matrix as an input and store cluster labels in a `self.labels_` attribute.
 
 ```python
+import glob
+import SPACE2
+
+antibody_models = glob.glob("path/to/antibody/models/*.pdb")
 
 algorithm = CustomClusteringAlgorithm()
-clustered_dataframe = SPACE2.cluster_with_algorithm(algorithm, files)
+clustered_dataframe = SPACE2.cluster_with_algorithm(algorithm, antibody_models)
 ```
 
 Antibodies are first grouped by CDR length and then clustered by structural similarity with the selected algorithm. The output will be a pandas dataframe with columns for filenames, CDR length clusters and structural clusters.
