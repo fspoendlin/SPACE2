@@ -7,7 +7,7 @@ Code to rapidly cluster antibody models by the structure of their CDRs.
 To download and install:
 
 ```bash
-$ git clone https://github.com/brennanaba/cdr-structural-clustering.git
+$ git clone https://github.com/fspoendlin/SPACE2.git
 $ pip install SPACE2/
 ```
 
