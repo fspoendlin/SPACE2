@@ -1,4 +1,4 @@
-# CDR Structural Clustering
+# Structural Profiling of Antibodies to Cluster by Epitope 2 (SPACE2)
 
 Code to rapidly cluster antibody models by the structure of their CDRs.
 
