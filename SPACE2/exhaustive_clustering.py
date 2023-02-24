@@ -1,33 +1,35 @@
 import numpy as np
+import numba as nb
 import pandas as pd
 from joblib import Parallel, delayed
 from SPACE2.util import cluster_antibodies_by_CDR_length, rmsd, parse_antibodies, possible_combinations
 
 
-def compare_CDRs_for_cluster(cluster, n_jobs=-1):
+@nb.njit(cache=True)
+def compare_CDRs_for_cluster(cluster):
     """ Used for exhaustive clustering.
     Computes the CDR rmsd between every pair of antibodies
-
     :param cluster: list of antibody tuples
-    :param n_jobs: number of cpus to use for parallelising. (default is all)
     :return:
     """
     size = len(cluster)
 
-    indices = possible_combinations(size)
-    rmsd_calculations = Parallel(n_jobs=n_jobs)(delayed(rmsd)(cluster[i], cluster[j]) for i, j in zip(*indices))
+    idx_1, idx_2 = possible_combinations(size)
+    lindices = len(idx_1)
+    
+    rmsd_calculations = np.empty(lindices)
+    for i in range(lindices):
+        rmsd_calculations[i] = rmsd(cluster[idx_1[i]], cluster[idx_2[i]])
+    
+    return (idx_1, idx_2), rmsd_calculations
 
-    return indices, rmsd_calculations
 
-
-def get_distance_matrix(cluster, ids, n_jobs=-1):
+def get_distance_matrix(cluster, ids):
     """Get matrix with rmsd distances between CDRs of length matched antibodies.
-
     :param cluster: list of antibody tuples
-    :param n_jobs: number of cpus to use when parallelising. (default is all)
     :return:
     """
-    indices, distances = compare_CDRs_for_cluster(cluster, n_jobs=n_jobs)
+    indices, distances = compare_CDRs_for_cluster(nb.typed.List(cluster))
 
     dist_mat = np.zeros((len(cluster), len(cluster)))
     for i, index in enumerate(zip(*indices)):
