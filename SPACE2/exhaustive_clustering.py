@@ -1,33 +1,35 @@
 import numpy as np
+import numba as nb
 import pandas as pd
 from joblib import Parallel, delayed
 from SPACE2.util import cluster_antibodies_by_CDR_length, rmsd, parse_antibodies, possible_combinations
 
 
-def compare_CDRs_for_cluster(cluster, n_jobs=-1):
+@nb.njit(cache=True, fastmath=True)
+def compare_CDRs_for_cluster(cluster):
     """ Used for exhaustive clustering.
     Computes the CDR rmsd between every pair of antibodies
-
     :param cluster: list of antibody tuples
-    :param n_jobs: number of cpus to use for parallelising. (default is all)
     :return:
     """
     size = len(cluster)
 
-    indices = possible_combinations(size)
-    rmsd_calculations = Parallel(n_jobs=n_jobs)(delayed(rmsd)(cluster[i], cluster[j]) for i, j in zip(*indices))
+    idx_1, idx_2 = possible_combinations(size)
+    lindices = len(idx_1)
+    
+    rmsd_calculations = np.empty(lindices)
+    for i in range(lindices):
+        rmsd_calculations[i] = rmsd(cluster[idx_1[i]], cluster[idx_2[i]])
+    
+    return (idx_1, idx_2), rmsd_calculations
 
-    return indices, rmsd_calculations
 
-
-def get_distance_matrix(cluster, ids, n_jobs=-1):
+def get_distance_matrix(cluster, ids):
     """Get matrix with rmsd distances between CDRs of length matched antibodies.
-
     :param cluster: list of antibody tuples
-    :param n_jobs: number of cpus to use when parallelising. (default is all)
     :return:
     """
-    indices, distances = compare_CDRs_for_cluster(cluster, n_jobs=n_jobs)
+    indices, distances = compare_CDRs_for_cluster(nb.typed.List(cluster))
 
     dist_mat = np.zeros((len(cluster), len(cluster)))
     for i, index in enumerate(zip(*indices)):
@@ -128,7 +130,7 @@ def get_clustering(df, clustering):
     return pd.DataFrame({'ID': ids, 'cluster_by_length': length, 'cluster_by_rmsd': cluster})
 
 
-def cluster_with_algorithm(method, files):
+def cluster_with_algorithm(method, files, n_jobs=-1):
     """ Sort a list of antibody pdb files into clusters.
     Antibodies are first clustered by CDR length and the by structural similarity
 
@@ -136,7 +138,7 @@ def cluster_with_algorithm(method, files):
     :param files: list of antibody pdb files. These will be used to identify each antibody
     :return: pandas dataframe with columns ID, cluster_by_length, cluster_by_rmsd, matrix_index
     """
-    matrices_dict = get_distance_matrices(files, n_jobs=16)
+    matrices_dict = get_distance_matrices(files, n_jobs=n_jobs)
     meta_data, rmsd_matrices = matrices_to_pandas_list(matrices_dict)
     cluster_labels = cluster_martices(rmsd_matrices, method)
 
