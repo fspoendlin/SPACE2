@@ -130,7 +130,7 @@ def get_clustering(df, clustering):
     return pd.DataFrame({'ID': ids, 'cluster_by_length': length, 'cluster_by_rmsd': cluster})
 
 
-def cluster_with_algorithm(method, files):
+def cluster_with_algorithm(method, files, n_jobs=-1):
     """ Sort a list of antibody pdb files into clusters.
     Antibodies are first clustered by CDR length and the by structural similarity
 
@@ -138,7 +138,7 @@ def cluster_with_algorithm(method, files):
     :param files: list of antibody pdb files. These will be used to identify each antibody
     :return: pandas dataframe with columns ID, cluster_by_length, cluster_by_rmsd, matrix_index
     """
-    matrices_dict = get_distance_matrices(files, n_jobs=16)
+    matrices_dict = get_distance_matrices(files, n_jobs=n_jobs)
     meta_data, rmsd_matrices = matrices_to_pandas_list(matrices_dict)
     cluster_labels = cluster_martices(rmsd_matrices, method)
 
