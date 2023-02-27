@@ -5,7 +5,7 @@ from joblib import Parallel, delayed
 from SPACE2.util import cluster_antibodies_by_CDR_length, rmsd, parse_antibodies, possible_combinations
 
 
-@nb.njit(cache=True)
+@nb.njit(cache=True, fastmath=True)
 def compare_CDRs_for_cluster(cluster):
     """ Used for exhaustive clustering.
     Computes the CDR rmsd between every pair of antibodies

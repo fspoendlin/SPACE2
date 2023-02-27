@@ -86,7 +86,7 @@ def parse_antibodies(files, n_jobs=20):
     return Parallel(n_jobs=n_jobs)(delayed(parse_antibody)(file) for file in files)
 
 
-@nb.njit
+@nb.njit(cache=True, fastmath=True)
 def get_residues(antibody, selection):
     numbers, coords = antibody
 
@@ -105,7 +105,7 @@ def get_residues(antibody, selection):
     return select
 
 
-@nb.njit
+@nb.njit(cache=True, fastmath=True)
 def remove_insertions(ab):
     nums = ab[0]
     l_ab = len(nums)
@@ -134,7 +134,7 @@ def get_CDR_lengths(antibody):
     return len_h1, len_h2, len_h3, len_l1, len_l2, len_l3
 
 
-@nb.njit
+@nb.njit(cache=True, fastmath=True)
 def possible_combinations(size):
     out1 = np.zeros(size * (size - 1) // 2, dtype=nb.int32)
     out2 = np.zeros(size * (size - 1) // 2, dtype=nb.int32)
@@ -148,7 +148,7 @@ def possible_combinations(size):
     return out1, out2
 
 
-@nb.njit
+@nb.njit(cache=True, fastmath=True)
 def get_alignment_transform(fixed, moveable, anchors):
     fixed, moveable = remove_insertions(fixed), remove_insertions(moveable)
     anchors = np.intersect1d(np.intersect1d(anchors, fixed[0]), moveable[0])
@@ -173,14 +173,14 @@ def get_alignment_transform(fixed, moveable, anchors):
     return anch1_center, anch2_center, U
 
 
-@nb.njit
+@nb.njit(cache=True, fastmath=True)
 def align(fixed, moveable, anchors):
     x, y, U = get_alignment_transform(fixed, moveable, anchors)
 
     return moveable[0], ((moveable[1] - x) @ U + y)
 
 
-@nb.njit
+@nb.njit(cache=True, fastmath=True)
 def rmsd(ab1, ab2, selection=reg_def_CDR_all, anchors=reg_def_fw_all):
     residues1 = get_residues(ab1, selection)
     residues2 = get_residues(align(ab1, ab2, anchors), selection)
