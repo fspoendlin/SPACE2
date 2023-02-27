@@ -49,9 +49,11 @@ def get_distance_matrices(files, n_jobs=-1):
     """
     antibodies = parse_antibodies(files, n_jobs=n_jobs)
     cdr_clusters, cdr_cluster_ids = cluster_antibodies_by_CDR_length(antibodies, files)
+    sorted_keys = sorted(cdr_cluster_ids, key=lambda k: len(cdr_cluster_ids[k]), reverse=True)
+
     rmsd_matrices = Parallel(n_jobs=n_jobs)(
-        delayed(get_distance_matrix)(cdr_clusters[key], cdr_cluster_ids[key]) for key in cdr_cluster_ids.keys())
-    rmsd_matrices = {key: rmsd_matrices[i] for i, key in enumerate(cdr_clusters)}
+        delayed(get_distance_matrix)(cdr_clusters[key], cdr_cluster_ids[key]) for key in sorted_keys)
+    rmsd_matrices = {key: rmsd_matrices[i] for i, key in enumerate(sorted_keys)}
 
     return rmsd_matrices
 
