@@ -12,6 +12,6 @@ def agglomerative_clustering(files, cutoff=1.0, n_jobs=-1):
     :return:
     """
     clustering_algorithm = AgglomerativeClustering(n_clusters=None, metric='precomputed', distance_threshold=cutoff, linkage='complete')
-    final_clustering = cluster_with_algorithm(clustering_algorithm, files)
+    final_clustering = cluster_with_algorithm(clustering_algorithm, files, n_jobs=n_jobs)
     
     return final_clustering

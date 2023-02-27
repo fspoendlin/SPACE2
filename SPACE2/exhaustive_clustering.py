@@ -140,6 +140,6 @@ def cluster_with_algorithm(method, files, n_jobs=-1):
     """
     matrices_dict = get_distance_matrices(files, n_jobs=n_jobs)
     meta_data, rmsd_matrices = matrices_to_pandas_list(matrices_dict)
-    cluster_labels = cluster_martices(rmsd_matrices, method)
+    cluster_labels = cluster_martices(rmsd_matrices, method, n_jobs=n_jobs)
 
     return get_clustering(meta_data, cluster_labels)
