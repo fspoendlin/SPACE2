@@ -18,6 +18,6 @@ setup(
         'joblib>=1.0.0',
         'scipy',
         'pandas',
-        'scikit-learn',
+        'scikit-learn>=1.2.1',
     ],
 )
