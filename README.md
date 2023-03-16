@@ -23,13 +23,13 @@ import SPACE2
 
 antibody_models = glob.glob("path/to/antibody/models/*.pdb")
 
-clustered_dataframe = SPACE2.agglomerative_clustering(antibody_models, cutoff=1.0)
+clustered_dataframe = SPACE2.agglomerative_clustering(antibody_models, cutoff=1.25)
 ```
 
 greedy clustering:
 
 ```python
-clustered_dataframe = SPACE2.greedy_clustering(antibody_models, cutoff=1.0)
+clustered_dataframe = SPACE2.greedy_clustering(antibody_models, cutoff=1.25)
 ```
 
 or a custom clustering aglorithm. The clustering algorithm should be a class and follow the syntax of scikit-learn. The class must have a `self.fit(X)` method that takes a distance matrix as an input and store cluster labels in a `self.labels_` attribute.
