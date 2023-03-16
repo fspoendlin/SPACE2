@@ -3,7 +3,7 @@ from joblib import Parallel, delayed
 from SPACE2.util import rmsd, parse_antibodies, cluster_antibodies_by_CDR_length, output_to_pandas
 
 
-def greedy_cluster(cluster, cutoff=1.0):
+def greedy_cluster(cluster, cutoff=1.25):
     """ Use greedy clustering to sort antibodies in to structurally similar groups.
 
     :param cluster: list of antibody tuples
