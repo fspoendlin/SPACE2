@@ -7,10 +7,10 @@ setup(
     version='0.0.1',
     description='Set of functions to cluster CDR structures',
     license='BSD 3-clause license',
-    maintainer='Brennan Abanades',
+    maintainer='Fabian Spoendlin',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    maintainer_email='brennan.abanadeskenyon@stx.ox.ac.uk',
+    maintainer_email='fabian.spoendlin@stats.ox.ac.uk',
     include_package_data=True,
     packages=find_packages(include=('SPACE2', 'SPACE2.*')),
     install_requires=[
