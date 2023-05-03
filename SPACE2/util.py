@@ -124,14 +124,9 @@ def remove_insertions(ab):
     return nums[indices], ab[1][indices]
 
 
-def get_CDR_lengths(antibody):
-    len_h1 = str(len(get_residues(antibody, reg_def["CDRH1"])))
-    len_h2 = str(len(get_residues(antibody, reg_def["CDRH2"])))
-    len_h3 = str(len(get_residues(antibody, reg_def["CDRH3"])))
-    len_l1 = str(len(get_residues(antibody, reg_def["CDRL1"])))
-    len_l2 = str(len(get_residues(antibody, reg_def["CDRL2"])))
-    len_l3 = str(len(get_residues(antibody, reg_def["CDRL3"])))
-    return len_h1, len_h2, len_h3, len_l1, len_l2, len_l3
+def get_CDR_lengths(antibody, selection=reg_def_CDR_all):
+    CDR_resis = np.split(selection, np.where(np.diff(selection, 1) > 2)[0]+1) # split into seperate array for each CDR
+    return [str(len(get_residues(antibody, CDR_resi))) for CDR_resi in CDR_resis]
 
 
 @nb.njit(cache=True, fastmath=True)
@@ -193,7 +188,7 @@ def rmsd(ab1, ab2, selection=reg_def_CDR_all, anchors=reg_def_fw_all):
     return np.sqrt(total / l)
 
 
-def cluster_antibodies_by_CDR_length(antibodies, ids):
+def cluster_antibodies_by_CDR_length(antibodies, ids, selection=reg_def_CDR_all):
     """ Sort a list of antibody tuples into groups with the same CDR lengths
 
     :param antibodies: list of antibody tuples
@@ -202,9 +197,9 @@ def cluster_antibodies_by_CDR_length(antibodies, ids):
     """
     clusters = dict()
     names = dict()
-
+    
     for i, antibody in enumerate(antibodies):
-        cdr_l = "_".join(get_CDR_lengths(antibody))
+        cdr_l = "_".join(get_CDR_lengths(antibody, selection=selection))
         if cdr_l not in clusters:
             clusters[cdr_l] = [antibody]
             names[cdr_l] = [ids[i]]
