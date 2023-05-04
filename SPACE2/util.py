@@ -4,6 +4,8 @@ import pandas as pd
 from joblib import Parallel, delayed
 
 # All are north region definitions in imgt numbering
+CDRs = ["CDRH1", "CDRH2", "CDRH3", "CDRL1", "CDRL2", "CDRL3"]
+fw = ["fwH", "fwL"]
 reg_def = dict()
 reg_def["fwH"] = [6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 41, 42, 43, 44, 45, 46, 47, 48, 49,
                   50, 51, 52, 53, 54, 67, 68, 69, 70, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87,
@@ -18,17 +20,18 @@ reg_def["CDRH3"] = [105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 
 reg_def["CDRL1"] = [152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168]
 reg_def["CDRL2"] = [183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197]
 reg_def["CDRL3"] = [233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245]
-reg_def["CDR_H_all"] = reg_def["CDRH1"] + reg_def["CDRH2"] + reg_def["CDRH3"]
-reg_def["CDR_L_all"] = reg_def["CDRL1"] + reg_def["CDRL2"] + reg_def["CDRL3"]
-reg_def["CDR_all"] = reg_def["CDR_H_all"] + reg_def["CDR_L_all"]
-reg_def["fw_all"] = reg_def["fwH"] + reg_def["fwL"]
 
 # numba does not like lists very much
 reg_def = {x: np.array(reg_def[x]) for x in reg_def}
 
+reg_def["CDR_H_all"] = [reg_def[CDR] for CDR in ["CDRH1", "CDRH2", "CDRH3"]]
+reg_def["CDR_L_all"] = [reg_def[CDR] for CDR in ["CDRL1", "CDRL2", "CDRL3"]]
+reg_def["CDR_all"] = reg_def["CDR_H_all"] + reg_def["CDR_L_all"]
+reg_def["fw_all"] = [reg_def[fw] for fw in ["fwH", "fwL"]]
+
 # Store these to use in jit
-reg_def_CDR_all = reg_def["CDR_all"]
-reg_def_fw_all = reg_def["fw_all"]
+reg_def_CDR_all = np.concatenate(reg_def["CDR_all"])
+reg_def_fw_all = np.concatenate(reg_def["fw_all"])
 
 
 def random_rot():
@@ -125,8 +128,7 @@ def remove_insertions(ab):
 
 
 def get_CDR_lengths(antibody, selection=reg_def_CDR_all):
-    CDR_resis = np.split(selection, np.where(np.diff(selection, 1) > 2)[0]+1) # split into seperate array for each CDR
-    return [str(len(get_residues(antibody, CDR_resi))) for CDR_resi in CDR_resis]
+    return [str(len(get_residues(antibody, CDR))) for CDR in selection]
 
 
 @nb.njit(cache=True, fastmath=True)
@@ -188,7 +190,7 @@ def rmsd(ab1, ab2, selection=reg_def_CDR_all, anchors=reg_def_fw_all):
     return np.sqrt(total / l)
 
 
-def cluster_antibodies_by_CDR_length(antibodies, ids, selection=reg_def_CDR_all):
+def cluster_antibodies_by_CDR_length(antibodies, ids, selection=reg_def['CDR_all']):
     """ Sort a list of antibody tuples into groups with the same CDR lengths
 
     :param antibodies: list of antibody tuples

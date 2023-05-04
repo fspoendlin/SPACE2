@@ -2,7 +2,7 @@ import numpy as np
 import numba as nb
 import pandas as pd
 from joblib import Parallel, delayed
-from SPACE2.util import cluster_antibodies_by_CDR_length, rmsd, parse_antibodies, possible_combinations, reg_def_CDR_all, reg_def_CDR_all
+from SPACE2.util import cluster_antibodies_by_CDR_length, rmsd, parse_antibodies, possible_combinations, reg_def, reg_def_CDR_all, reg_def_fw_all
 
 
 @nb.njit(cache=True, fastmath=True)
@@ -39,7 +39,7 @@ def get_distance_matrix(cluster, ids, selection=reg_def_CDR_all, anchors=reg_def
     return (ids, dist_mat)
 
 
-def get_distance_matrices(files, selection=reg_def_CDR_all, anchors=reg_def_fw_all, n_jobs=-1):
+def get_distance_matrices(files, selection=reg_def["CDR_all"], anchors=reg_def["fw_all"], n_jobs=-1):
     """ Calculate CDR distance matrices between antibody pdb files.
     Antibodies are first clustered by CDR length and then an rmsd matrix is calculated for each cluster.
 
@@ -50,7 +50,11 @@ def get_distance_matrices(files, selection=reg_def_CDR_all, anchors=reg_def_fw_a
     antibodies = parse_antibodies(files, n_jobs=n_jobs)
     cdr_clusters, cdr_cluster_ids = cluster_antibodies_by_CDR_length(antibodies, files, selection=selection)
     sorted_keys = sorted(cdr_cluster_ids, key=lambda k: len(cdr_cluster_ids[k]), reverse=True)
-
+    
+    # convert to single array for njit
+    selection = np.concatenate(selection)
+    anchors = np.concatenate(anchors)
+    
     rmsd_matrices = Parallel(n_jobs=n_jobs)(
         delayed(get_distance_matrix)(cdr_clusters[key], cdr_cluster_ids[key], selection=selection, anchors=anchors) for key in sorted_keys)
     rmsd_matrices = {key: rmsd_matrices[i] for i, key in enumerate(sorted_keys)}
@@ -132,7 +136,7 @@ def get_clustering(df, clustering):
     return pd.DataFrame({'ID': ids, 'cluster_by_length': length, 'cluster_by_rmsd': cluster})
 
 
-def cluster_with_algorithm(method, files, selection=reg_def_CDR_all, anchors=reg_def_fw_all, n_jobs=-1):
+def cluster_with_algorithm(method, files, selection=reg_def["CDR_all"], anchors=reg_def["fw_all"], n_jobs=-1):
     """ Sort a list of antibody pdb files into clusters.
     Antibodies are first clustered by CDR length and the by structural similarity
 

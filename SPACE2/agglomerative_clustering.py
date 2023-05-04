@@ -1,9 +1,9 @@
 from sklearn.cluster import AgglomerativeClustering
 from SPACE2.exhaustive_clustering import cluster_with_algorithm
-from SPACE2.util import reg_def_fw_all, reg_def_CDR_all
+from SPACE2.util import reg_def
 
 
-def agglomerative_clustering(files, selection=reg_def_CDR_all, anchors=reg_def_fw_all, cutoff=1.25, n_jobs=-1):
+def agglomerative_clustering(files, selection=reg_def["CDR_all"], anchors=reg_def["fw_all"], cutoff=1.25, n_jobs=-1):
     """ Sort a list of antibody pdb files into clusters.
     Antibodies are first clustered by CDR length and the by structural similarity
 
