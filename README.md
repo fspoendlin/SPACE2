@@ -41,7 +41,7 @@ clustered_dataframe = SPACE2.cluster_with_algorithm(algorithm, antibody_models)
 
 Antibodies are first grouped by CDR length and then clustered by structural similarity with the selected algorithm. The output is a pandas dataframe with columns for filenames, CDR length clusters (containing the number of residues of all CDRs considered during the clustering) and structural clusters (indicating the filename of a cluster representative).
 
-By default the length of all CDRs will be used to group the antibodies and RMSDs will be calculated across all of them after alignment on both heavy and light chain framework regions. CDRs and frameworks to used can be adapted with `selection` and `anchor` arguments. Here is an example how to restict clustering to heavy chain CDRs and framework.
+By default the length of all CDRs will be used to group the antibodies and RMSDs will be calculated across all of them after alignment on both heavy and light chain framework regions. CDRs and frameworks to be used for clustering can be adapted with `selection` and `anchor` arguments. Here is an example how to restict clustering to heavy chain CDRs and framework.
 
 ```python
 from SPACE2 import reg_def
