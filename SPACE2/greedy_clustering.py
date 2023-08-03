@@ -61,7 +61,7 @@ def greedy_clustering(files, selection=reg_def["CDR_all"], anchors=reg_def["fw_a
     anchors = np.concatenate(anchors)
 
     final_clustering = Parallel(n_jobs=n_jobs)(
-        delayed(greedy_cluster_ids)(cdr_clusters[key], cdr_cluster_ids[key], cutoff, selection=np.concatenate(selection), anchors=np.concatenate(anchors)) for key in cdr_cluster_ids.keys())
+        delayed(greedy_cluster_ids)(cdr_clusters[key], cdr_cluster_ids[key], cutoff, selection=selection, anchors=anchors) for key in cdr_cluster_ids.keys())
     final_clustering = {key: final_clustering[i] for i, key in enumerate(cdr_clusters)}
 
     return output_to_pandas(final_clustering)
