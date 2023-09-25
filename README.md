@@ -78,9 +78,9 @@ at O(n<sup>1.5</sup>) with the number of antibodies (n).
 @article{Spoendlin2023,
 	title = {Improved computational epitope profiling using structural models identifies a broader diversity of antibodies that bind the same epitope},
 	author = {Fabian C. Spoendlin, Brennan Abanades, Matthew I. J. Raybould, Wing Ki Wong, Guy Georges, and Charlotte M. Deane},
-	journal = {bioRxiv},
-	doi = {10.1101/2023.06.09.543890},
-	URL = {https://www.biorxiv.org/content/10.1101/2023.06.09.543890v1},
+	journal = {Frontiers in Molecular Biosciences},
+	doi = {10.3389/fmolb.2023.1237621},
+	volume = {10},
 	year = {2023},
 }
 ```
