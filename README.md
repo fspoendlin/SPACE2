@@ -1,6 +1,6 @@
 # Structural Profiling of Antibodies to Cluster by Epitope 2 (SPACE2)
 
-The SPACE2 algorithm is a method that rapidly clusters antibodies by the similarity of structural models and accurately groups antibodies that bind the same epitop.
+The SPACE2 algorithm is a method that rapidly clusters antibodies by the similarity of structural models and accurately groups antibodies that bind the same epitope.
 
 SPACE2 requires structural models of antibodies as an input, these can be generated with <a href="https://github.com/brennanaba/ImmuneBuilder">ImmuneBuilder</a>. Antibodies are then clustered in three main steps. Initially, the models are split into groups of identical CDR lengths. Models in each group are then structurally aligned on the Cα of residues in framework regions and a pairwise distance matrix is computed of the Cα RMSDs of CDR loop residues. The antibodies are then clustered based on these distances.
 
@@ -15,9 +15,9 @@ $ pip install SPACE2/
 
 ## Usage
 
-To run the clustering you will need antibody models which are IMGT numbered, these can be obtained from <a href="https://github.com/brennanaba/ImmuneBuilder">ImmuneBuilder</a>.
+To run the clustering you will need antibody models which are IMGT numbered and with chain identifier 'H' for the heavy chain and 'L' for the light chain. Models with IMGT numbering and correct chain identifiers can be obtained from a default run of <a href="https://github.com/brennanaba/ImmuneBuilder">ImmuneBuilder</a>.
 
-Once you have a directory with antibody models you can cluster them using SPACE2. We recommend using the agglomerative clustering method with an RMSD threshold of 1.25 Å and default `selection` and `anchors` parameters. This will use the length of all six CDRs to group the antibodies and RMSDs will be calculated across all six CDRs after alignment on both heavy and light chain framework regions.
+Once you have a directory with antibody models you can cluster them using SPACE2. We recommend using the agglomerative clustering method with an RMSD threshold of 1.25 Å and default `selection` and `anchors` parameters. This will use the length of all six CDRs to group the antibodies and RMSDs will be calculated across all six CDRs after alignment on both heavy and light chain framework regions. North CDR definitions are used by default.
 
 ```python
 import glob
@@ -41,12 +41,26 @@ algorithm = CustomClusteringAlgorithm(*args, **kwargs)
 clustered_dataframe = SPACE2.cluster_with_algorithm(algorithm, antibody_models)
 ```
 
-CDRs considered during the initial step of grouping by length as well as CDRs for RMSD calculation and frameworks to be used for structural alignment can be modified with `selection` and `anchor` arguments. Here is an example of how to restict SPACE2 to only consider the length and RMSDs of heavy chain CDRs and align on the heavy chain framework.
+CDRs considered during the initial step of grouping by length and used for the RMSD calculation can be modified with `selection` arguments. Frameworks to be used for structural alignment can be modified using the `anchor` arguments. Here, is an example of how to restict SPACE2 to only consider the length and RMSDs of heavy chain CDRs and align on the heavy chain framework.
 
 ```python
 from SPACE2 import reg_def
 
 cdr_selection = [reg_def['CDRH1'], reg_def['CDRH2'], reg_def['CDRH3']]
+fw_selection = [reg_def['fwH']]
+
+clustered_dataframe = SPACE2.agglomerative_clustering(antibody_models, selection=cdr_selection, anchors=fw_selection, cutoff=1.25)
+```
+
+Lists of residues can be passed for selection or anchors to customise the regions considered during clustering. The lists should contain the the IMGT number of each residue to include for the heavy chain and the IMGT number + 128 for the light chain. The code below provides an example of how to use CDR3 residues by IMGT region definitions.
+
+```python
+from SPACE2 import reg_def
+
+CDRH3 = list(range(105, 118))
+CDRL3 = [x+128 for x in CDRH3]
+
+cdr_selection = [reg_def['CDRH1'], reg_def['CDRH2'], CDRH3, reg_def['CDRL1'], reg_def['CDRL2'], CDRL3]
 fw_selection = [reg_def['fwH']]
 
 clustered_dataframe = SPACE2.agglomerative_clustering(antibody_models, selection=cdr_selection, anchors=fw_selection, cutoff=1.25)
