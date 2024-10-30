@@ -34,6 +34,7 @@ The SPACE2 package supports a range of options to customise clustering e.g:
 * Select CDRs for structural comparison and framework regions for structural alignment
 * Dynamic time warping distance calculation (drops requirement for identical CDR lengths)
 * Custom clustering algorithms 
+
 See notebooks for example usage.
 
 ## Output
