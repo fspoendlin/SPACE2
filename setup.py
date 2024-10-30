@@ -4,13 +4,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 setup(
     name='SPACE2',
-    version='0.0.1',
-    description='Set of functions to cluster CDR structures',
+    version='1.0.1',
+    description='Structural clustering of antibody CDR loops',
     license='BSD 3-clause license',
-    maintainer=['Brennan Abanades','Fabian Spoendlin'],
+    author=['Fabian Spoendlin','Brennan Abanades'],
+    maintainer='Fabian Spoendlin',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    maintainer_email=['brennan.abanadeskenyon@stx.ox.ac.uk','fabian.spoendlin@stats.ox.ac.uk'],
+    maintainer_email=['fabian.spoendlin@stats.ox.ac.uk'],
     include_package_data=True,
     packages=find_packages(include=('SPACE2', 'SPACE2.*')),
     install_requires=[

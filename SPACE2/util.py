@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.linalg import norm
 import numba as nb
 import pandas as pd
 from joblib import Parallel, delayed
@@ -32,6 +33,8 @@ reg_def["fw_all"] = [reg_def[fw] for fw in ["fwH", "fwL"]]
 # Store these to use in jit
 reg_def_CDR_all = np.concatenate(reg_def["CDR_all"])
 reg_def_fw_all = np.concatenate(reg_def["fw_all"])
+
+same_length_only = np.array([1, 1, 1, 1, 1, 1])
 
 
 def random_rot():
@@ -128,7 +131,7 @@ def remove_insertions(ab):
 
 
 def get_CDR_lengths(antibody, selection=reg_def_CDR_all):
-    return [str(len(get_residues(antibody, CDR))) for CDR in selection]
+    return [len(get_residues(antibody, CDR)) for CDR in selection]
 
 
 @nb.njit(cache=True, fastmath=True)
@@ -179,6 +182,7 @@ def align(fixed, moveable, anchors):
 
 @nb.njit(cache=True, fastmath=True)
 def rmsd(ab1, ab2, selection=reg_def_CDR_all, anchors=reg_def_fw_all):
+    ''' Root Mean Square Deviation between two antibodies'''
     residues1 = get_residues(ab1, selection)
     residues2 = get_residues(align(ab1, ab2, anchors), selection)
     l = len(residues1)
@@ -190,32 +194,89 @@ def rmsd(ab1, ab2, selection=reg_def_CDR_all, anchors=reg_def_fw_all):
     return np.sqrt(total / l)
 
 
-def cluster_antibodies_by_CDR_length(antibodies, ids, selection=reg_def['CDR_all']):
+@nb.njit(cache=True, fastmath=True)
+def dtw(ab1, ab2, selection=reg_def_CDR_all, anchors=reg_def_fw_all):
+    ''' Dynamic Time Warping distance between two antibodies'''
+    residues1 = get_residues(ab1, selection)
+    residues2 = get_residues(align(ab1, ab2, anchors), selection)
+    l1, l2 = residues1.shape[0], residues2.shape[0]
+    dtw_matrix = np.empty((l1,l2))
+
+    dtw_matrix[0][0] = norm(residues1[0]-residues2[0])**2
+    for i in range(1, l1):
+        dtw_matrix[i][0] = dtw_matrix[i - 1][0] + norm(residues1[i] - residues2[0])**2
+    for i in range(1, l2):
+        dtw_matrix[0][i] = dtw_matrix[0][i - 1] + norm(residues1[0] - residues2[i])**2
+    for i in range(1, l1):
+        for j in range(1, l2):
+            v = norm(residues1[i] - residues2[j])**2
+
+            v1 = dtw_matrix[i - 1][j]
+            v2 = dtw_matrix[i - 1][j - 1]
+            v3 = dtw_matrix[i][j - 1]
+
+            dtw_matrix[i][j] = min(v1, v2, v3) + v
+    
+    normalisation = 1 / max(l1, l2)
+    return np.sqrt(normalisation * np.sqrt(dtw_matrix[-1][-1])**2)
+
+
+def cluster_antibodies_by_CDR_length(antibodies, ids, selection=reg_def['CDR_all'], clustering='bins', tolerance=same_length_only):
     """ Sort a list of antibody tuples into groups with the same CDR lengths
 
-    :param antibodies: list of antibody tuples
-    :param ids: list of ids for each antibody
-    :return:
+    :param cluster: list of tuples, antibodies
+    :param ids: list, antibody ids
+    :param selection: list of np.arrays, indices of residues used for length clustering.
+    :param clustering: str, method for clustering antibodies by CDR length. Options are 'bins' or 'greedy'. (default is 'bins')
+                       bins: CDRs are grouped into precalculated and equally spaced length bins
+                       greedy: stochastic selection of cluster centers
+    :param tolerance: np.array, binwidth for length clustering per CDR. (default clustering into bins of identical length)
+                      array is required to have the same length as selection, with each element corresponding to the length 
+                      tolerance of an individual CDR region.
+    :return clusters: dictionary with clusters of antibodies tuples
+    :return names: dictionary with ids of the antibodies in each cluster
     """
     clusters = dict()
     names = dict()
+    greedy_tolerance = (tolerance - 1) / 2 # length difference instead of binwidth
     
     for i, antibody in enumerate(antibodies):
-        cdr_l = "_".join(get_CDR_lengths(antibody, selection=selection))
-        if cdr_l not in clusters:
-            clusters[cdr_l] = [antibody]
-            names[cdr_l] = [ids[i]]
-        else:
-            clusters[cdr_l].append(antibody)
-            names[cdr_l].append(ids[i])
+        cdr_l = np.array(get_CDR_lengths(antibody, selection=selection))
+
+        if clustering == 'bins': # use predefined bins to asign length clusters
+            bin = (cdr_l // tolerance) * tolerance
+            bin = "_".join(map(str, bin))
+            if bin not in clusters:
+                clusters[bin] = [antibody]
+                names[bin] = [ids[i]]
+            else:
+                clusters[bin].append(antibody)
+                names[bin].append(ids[i])
+
+        elif clustering == 'greedy': # use greedy algorithm to asign length cluster
+            in_cluster = False
+            for key in clusters:
+                key_lengths = np.array(list(map(int, key.split("_"))))
+
+                if all(np.absolute(cdr_l - key_lengths) <= greedy_tolerance):
+                    clusters[key].append(antibody)
+                    names[key].append(ids[i])
+                    in_cluster = True
+                    break
+            
+            if not in_cluster:
+                cdr_key = "_".join(map(str, cdr_l))
+                clusters[cdr_key] = [antibody]
+                names[cdr_key] = [ids[i]]
+
     return clusters, names
 
 
 def output_to_pandas(output):
     """ Sort output into a pandas dataframe
 
-    :param output: dictionary of dictionaries of lists outputted by clustering
-    :return: pandas dataframe
+    :param output: dict of dicta of lists, clustering output
+    :return: pd.DataFrame
     """
     df = pd.DataFrame()
 
@@ -235,3 +296,11 @@ def output_to_pandas(output):
     df["cluster_by_rmsd"] = cluster_by_rmsd
 
     return df
+
+
+def check_param(tolerance, d_metric):
+    ''' Check if the input parameters are valid'''
+    if any(tolerance < 1):
+        raise ValueError("All entries of length tolerance must be >= 1")
+    if d_metric == 'rmsd' and not all(tolerance == 1):
+        raise ValueError("RMSD metric only supports length tolerance 1 for all CDRs")
