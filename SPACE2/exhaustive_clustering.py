@@ -143,7 +143,7 @@ def cluster_martices(distance_matrices, clustering_method, n_jobs=-1):
     :param n_jobs: float, number of cpus for parallelisation
     :return: list of arrays, antibody cluster labels
     """
-    cluster_labels = Parallel(n_jobs=n_jobs)(delayed(cluster_matrix)(matrix, clustering_method) for matrix in matrices)
+    cluster_labels = Parallel(n_jobs=n_jobs)(delayed(cluster_matrix)(matrix, clustering_method) for matrix in distance_matrices)
     return cluster_labels
 
 
