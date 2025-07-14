@@ -2,7 +2,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from SPACE2.util import (
     rmsd, dtw, parse_antibodies, cluster_antibodies_by_CDR_length, output_to_pandas, check_param,
-    reg_def, reg_def_CDR_all, reg_def_fw_all, same_length_only
+    reg_def, reg_def_CDR_all, reg_def_fw_all
 )
 
 def greedy_cluster(cluster, d_funct, selection=reg_def_CDR_all, anchors=reg_def_fw_all, cutoff=1.25):
@@ -55,7 +55,7 @@ def greedy_cluster_ids(cluster, ids, d_funct, selection=reg_def_CDR_all, anchors
 
 
 def greedy_clustering(files, selection=reg_def["CDR_all"], anchors=reg_def["fw_all"], cutoff=1.25,  d_metric='rmsd',
-                      length_clustering='bins', length_tolerance=same_length_only, n_jobs=-1):
+                      length_clustering='bins', length_tolerance='same_length_only', n_jobs=-1):
     """ Sort a list of antibody pdb files into clusters using greedy algorithm.
     Antibodies are first clustered by CDR length and then by structural similarity
 
@@ -72,13 +72,18 @@ def greedy_clustering(files, selection=reg_def["CDR_all"], anchors=reg_def["fw_a
     :param length_clustering: str, method for clustering antibodies by CDR length. Options are 'bins' or 'greedy'. (default is 'bins')
                               bins: CDRs are grouped into precalculated and equally spaced length bins
                               greedy: stochastic selection of cluster centers
-    :param length_tolerance: np.array, binwidth for length clustering per CDR. (default clustering into bins of identical length)
+    :param length_tolerance: str or np.array, binwidth for length clustering per CDR. (default clustering into bins of identical length)
                              array is required to have the same length as selection, with each element corresponding to the length 
                              tolerance of an individual CDR region.
     :param n_jobs: int, number of cpus to use for parallelising. (default is all)
 
     :return final_clustering: pd.DataFrame, containing the cluster assignments
     """
+    if isinstance(length_tolerance, str):
+        if length_tolerance == 'same_length_only':
+            n = len(selection)
+            length_tolerance = np.ones(n)
+
     check_param(length_tolerance, d_metric)
 
     antibodies = parse_antibodies(files, n_jobs=n_jobs)

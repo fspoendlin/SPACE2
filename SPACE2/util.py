@@ -34,8 +34,7 @@ reg_def["fw_all"] = [reg_def[fw] for fw in ["fwH", "fwL"]]
 reg_def_CDR_all = np.concatenate(reg_def["CDR_all"])
 reg_def_fw_all = np.concatenate(reg_def["fw_all"])
 
-same_length_only = np.array([1, 1, 1, 1, 1, 1])
-
+same_length_all_cdrs = np.ones(6)
 
 def random_rot():
     """ Just a random rotation
@@ -221,7 +220,7 @@ def dtw(ab1, ab2, selection=reg_def_CDR_all, anchors=reg_def_fw_all):
     return np.sqrt(normalisation * np.sqrt(dtw_matrix[-1][-1])**2)
 
 
-def cluster_antibodies_by_CDR_length(antibodies, ids, selection=reg_def['CDR_all'], clustering='bins', tolerance=same_length_only):
+def cluster_antibodies_by_CDR_length(antibodies, ids, selection=reg_def['CDR_all'], clustering='bins', tolerance=same_length_all_cdrs):
     """ Sort a list of antibody tuples into groups with the same CDR lengths
 
     :param cluster: list of tuples, antibodies
@@ -300,6 +299,8 @@ def output_to_pandas(output):
 
 def check_param(tolerance, d_metric):
     ''' Check if the input parameters are valid'''
+    if tolerance is None:
+        raise ValueError("Length tolerance must be specified as a np.array")
     if any(tolerance < 1):
         raise ValueError("All entries of length tolerance must be >= 1")
     if d_metric == 'rmsd' and not all(tolerance == 1):

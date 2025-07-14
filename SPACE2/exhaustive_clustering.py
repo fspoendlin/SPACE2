@@ -4,7 +4,7 @@ import pandas as pd
 from joblib import Parallel, delayed
 from SPACE2.util import (
     cluster_antibodies_by_CDR_length, rmsd, dtw, parse_antibodies, possible_combinations, check_param,
-    reg_def, reg_def_CDR_all, reg_def_fw_all, same_length_only
+    reg_def, reg_def_CDR_all, reg_def_fw_all, same_length_all_cdrs
 )
 
 
@@ -53,7 +53,7 @@ def get_distance_matrix(cluster, ids, d_funct, selection=reg_def_CDR_all, anchor
 
 
 def get_distance_matrices(files, selection=reg_def["CDR_all"], anchors=reg_def["fw_all"], d_metric='rmsd',
-                          length_clustering='bins', length_tolerance=same_length_only, n_jobs=-1):
+                          length_clustering='bins', length_tolerance=same_length_all_cdrs, n_jobs=-1):
     """ Calculate CDR distance matrices between antibody pdb files.
     Antibodies are first clustered by CDR length and then a distance matrix is calculated for each cluster.
 
@@ -168,7 +168,7 @@ def get_clustering(df, clustering):
 
 
 def cluster_with_algorithm(method, files, selection=reg_def["CDR_all"], anchors=reg_def["fw_all"], 
-                           d_metric='rmsd', length_clustering='bins', length_tolerance=same_length_only, n_jobs=-1):
+                           d_metric='rmsd', length_clustering='bins', length_tolerance='same_length_only', n_jobs=-1):
     """ Sort a list of antibody pdb files into clusters.
     Antibodies are first clustered by CDR length and the by structural similarity
 
@@ -178,10 +178,15 @@ def cluster_with_algorithm(method, files, selection=reg_def["CDR_all"], anchors=
     :param anchors: list of np.arrays, indices of residues used for structural alignment of antibodies.
     :param d_metric: str, metric for structural distance calculation. Options are 'rmsd' or 'dtw'.
     :param length_clustering: str, method for clustering antibodies by CDR length. Options are 'bins' or 'greedy'.
-    :param length_tolerance: np.array, binwidth for length clustering per CDR.
+    :param length_tolerance: str or np.array: binwidth for length clustering per CDR.
     :param n_jobs: int, number of cpus to use for parallelising.
     :return: pd.DataFrame, clustering output with columns ID, cluster_by_length, cluster_by_rmsd, matrix_index
     """
+    if isinstance(length_tolerance, str):
+        if length_tolerance == 'same_length_only':
+            n = len(selection)
+            length_tolerance = np.ones(n)
+
     matrices_dict = get_distance_matrices(
         files, selection=selection, anchors=anchors, d_metric=d_metric, length_clustering=length_clustering,
         length_tolerance=length_tolerance, n_jobs=n_jobs
