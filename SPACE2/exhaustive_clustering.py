@@ -42,7 +42,10 @@ def get_distance_matrix(cluster, ids, d_funct, selection=reg_def_CDR_all, anchor
     :return ids: list, antibody ids
     :return dist_mat: np.array, matrix of structural distances
     """
-    indices, distances = compare_CDRs_for_cluster(nb.typed.List(cluster), d_funct, selection=selection, anchors=anchors)
+    lst = nb.typed.List()
+    for ab in cluster:
+        lst.append(ab)
+    indices, distances = compare_CDRs_for_cluster(lst, d_funct, selection=selection, anchors=anchors)
 
     dist_mat = np.zeros((len(cluster), len(cluster)))
     for i, index in enumerate(zip(*indices)):
